@@ -7,7 +7,7 @@ import json
 import random
 import math
 from flask import Flask, request, jsonify
-from flask_cors import cross_origin
+from flask_cors import cross_origin, CORS
 
 MAPS_API_KEY = 'AIzaSyAK8JU6JM9QdDeIgtAro3VnO35xcioY39U'
 MAPS_BASE = 'https://maps.googleapis.com/maps/api/directions/json'
