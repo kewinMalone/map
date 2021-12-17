@@ -35,7 +35,7 @@ def manage_db():
 container_users = manage_db()
 
 app = Flask(__name__)
-CORS(app, resources={r"/": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/api/signup', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -154,8 +154,7 @@ def route():
     # data = []
     # for route in routes:
     response = jsonify({"data": routes})
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+    return response, 200
 
 
 # get all users
