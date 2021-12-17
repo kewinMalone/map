@@ -10,6 +10,7 @@ from flask import Flask, request, jsonify
 from flask_cors import cross_origin
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 MAPS_API_KEY = 'AIzaSyAK8JU6JM9QdDeIgtAro3VnO35xcioY39U'
 MAPS_BASE = 'https://maps.googleapis.com/maps/api/directions/json'
