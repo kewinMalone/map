@@ -86,6 +86,7 @@ gmaps = googlemaps.Client(key=MAPS_API_KEY)
 
 
 @app.route('/getroutes', methods=["POST"])
+@cross_origin(supports_credentials=True)
 def route():
     input_json = request.get_json(force=True)
     orig, dest, vid = input_json['origin'], input_json['destination'], input_json['vid']
