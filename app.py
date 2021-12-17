@@ -9,9 +9,6 @@ import math
 from flask import Flask, request, jsonify
 from flask_cors import cross_origin
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
-
 MAPS_API_KEY = 'AIzaSyAK8JU6JM9QdDeIgtAro3VnO35xcioY39U'
 MAPS_BASE = 'https://maps.googleapis.com/maps/api/directions/json'
 OPEN_WEATHER_KEY = '1adb7febc5d62f1cbf871d3ec3e45cd2'
@@ -37,6 +34,8 @@ def manage_db():
 
 container_users = manage_db()
 
+app = Flask(__name__)
+CORS(app, resources={r"/getroutes": {"origins": "*"}})
 
 @app.route('/api/signup', methods=['POST'])
 @cross_origin(supports_credentials=True)
