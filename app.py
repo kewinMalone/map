@@ -31,11 +31,12 @@ def manage_db():
     )
     return Container_users
 
-
 container_users = manage_db()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+gmaps = googlemaps.Client(key=MAPS_API_KEY)
+
 
 @app.route('/api/signup', methods=['POST'])
 @cross_origin(supports_credentials=True)
@@ -77,13 +78,6 @@ def login():
     return jsonify(dictToReturn), 201
 
 
-# container_users.replace_item(username, userupdate, populate_query_metrics=None, pre_trigger_include=None,
-#                             post_trigger_include=None)
-
-
-gmaps = googlemaps.Client(key=MAPS_API_KEY)
-
-
 @app.route('/getroutes', methods=["POST"])
 @cross_origin(supports_credentials=True)
 def route():
@@ -99,9 +93,10 @@ def route():
         route_info = {}
         new_route = []
         pollution_index = 0
-        stepsx = math.log2(len(steps))
+        stepsx = int(math.log2(len(steps)))
         skipsteps = len(steps) // stepsx
         cnt = skipsteps
+        stepsindex = []
         pindexsteps = 0
 
         for step in steps:
@@ -113,16 +108,16 @@ def route():
                 response = requests.get(uri)
                 response = json.loads(response.text)
                 pollution_index += int(response['list'][0]['main']['aqi'])
+                stepsindex.append(pollution_index)
                 pindexsteps += 1
 
             cnt -= 1
 
         pollution_index = round(pollution_index / stepsx)
-        print(pollution_index)
         pollution_index = pollution_index + random.random() - 1
 
         new_route.append({"lat": destLat, "lng": destLong})
-        route_info['index'] = pollution_index
+        route_info['index'] = sum(stepsindex)//len(stepsindex)
         route_info['steps'] = new_route
         route_info['time'] = route['legs'][0]['duration']['text']
         route_info['dist'] = route['legs'][0]['distance']['text']
@@ -149,6 +144,7 @@ def route():
         else:
             route_info['vindex'] = 0
 
+        print(route_info)
         routes.append(route_info)
 
     # data = []
@@ -169,11 +165,17 @@ def allusers():
 @app.route('/addvehicle', methods=["POST"])
 def addvehicle():
     input_json = request.get_json(force=True)
-    username, vid = str(input_json['username']), input_json['vid']
+    username, vid, make, model = str(input_json['username']), input_json['vid'], input_json['make'], input_json['model']
+
+    veh = {
+        "vid":vid,
+        "make":make,
+        "model":model
+    }
 
     try:
         user = container_users.read_item(item=username, partition_key=username)
-        user['vehicles'].append(vid)
+        user['vehicles'].append(veh)
         container_users.replace_item(username, user, populate_query_metrics=None, pre_trigger_include=None,
                                      post_trigger_include=None)
     except:
@@ -241,3 +243,23 @@ def vehicleestimate():
     data = json.loads(response.text)
 
     return jsonify({"data": data['data']['attributes']['carbon_kg']}), 201
+
+
+# get user info
+@app.route('/userinfo', methods=["POST"])
+def userinfo():
+    input_json = request.get_json(force=True)
+    username = input_json['username']
+
+    try:
+        user = container_users.read_item(item=username, partition_key=username)
+        data = {
+            "username":user['id'],
+            "mail":user['mail'],
+            "vehicles":user['vehicles']
+        }
+
+        return jsonify({"data":data}), 200
+
+    except:
+        return jsonify({"message": "The username you entered doesnot exist"}), 404
