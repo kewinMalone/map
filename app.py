@@ -6,23 +6,25 @@ import requests
 import json
 import random
 import math
+import os
 from flask import Flask, request, jsonify
 from flask_cors import cross_origin, CORS
 
-MAPS_API_KEY = 'AIzaSyAK8JU6JM9QdDeIgtAro3VnO35xcioY39U'
 MAPS_BASE = 'https://maps.googleapis.com/maps/api/directions/json'
-OPEN_WEATHER_KEY = '1adb7febc5d62f1cbf871d3ec3e45cd2'
-CARBON_KEY = 'aLfvYEA5pZbwxEPNtRdDFA'
 POLLUTION_BASE = 'http://api.openweathermap.org/data/2.5/air_pollution?'
+
+MAPS_API_KEY = os.environ['MAPS_API_KEY']
+OPEN_WEATHER_KEY = os.environ['OPEN_WEATHER_KEY']
+CARBON_KEY = os.environ['CARBON_KEY']
+DB_KEY = os.environ['DB_KEY']
 
 
 def manage_db():
     endpoint = 'https://xyz.documents.azure.com:443/'
-    key = 'PXHKqZ6BwMj33ptKm2T2TLO29HMo6nuJBFJJI2H7oceERMCX7pfjK9dBWNaUFKWZv7pflflmqpxkUQABlVhSSQ=='
     database_name = 'greenway'
     container_users_name = 'users'
 
-    client = CosmosClient(endpoint, key)
+    client = CosmosClient(endpoint, DB_KEY)
     database = client.create_database_if_not_exists(id=database_name)
 
     Container_users = database.create_container_if_not_exists(
