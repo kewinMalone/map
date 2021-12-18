@@ -97,7 +97,6 @@ def route():
         skipsteps = len(steps) // stepsx
         cnt = skipsteps
         stepsindex = []
-        pindexsteps = 0
 
         for step in steps:
             new_route.append(step['start_location'])
@@ -107,17 +106,12 @@ def route():
                 uri = POLLUTION_BASE + f"lat={step['start_location']['lat']}&lon={step['start_location']['lng']}&appid={OPEN_WEATHER_KEY}"
                 response = requests.get(uri)
                 response = json.loads(response.text)
-                pollution_index += int(response['list'][0]['main']['aqi'])
-                stepsindex.append(pollution_index)
-                pindexsteps += 1
+                stepsindex.append(int(response['list'][0]['main']['aqi']))
 
             cnt -= 1
 
-        pollution_index = round(pollution_index / stepsx)
-        pollution_index = pollution_index + random.random() - 1
-
         new_route.append({"lat": destLat, "lng": destLong})
-        route_info['index'] = sum(stepsindex)//len(stepsindex)
+        route_info['index'] = sum(stepsindex)//len(stepsindex) + random.random() - 1
         route_info['steps'] = new_route
         route_info['time'] = route['legs'][0]['duration']['text']
         route_info['dist'] = route['legs'][0]['distance']['text']
@@ -144,11 +138,8 @@ def route():
         else:
             route_info['vindex'] = 0
 
-        print(route_info)
         routes.append(route_info)
 
-    # data = []
-    # for route in routes:
     response = jsonify({"data": routes})
     return response, 200
 
